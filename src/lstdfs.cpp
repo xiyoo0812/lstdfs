@@ -165,14 +165,29 @@ static int lstdfs_is_absolute(lua_State* L) {
     return 1;
 }
 
+static int lstdfs_last_write_time(lua_State* L) {
+    lua_pushboolean(L, filesystem::last_write_time(lua_tostring(L, 1)));
+    return 1;
+}
+
+
 static int lstdfs_dir(lua_State* L) {
     lua_newtable(L);
     size_t size = 0;
     filesystem::path path = filesystem::path(lua_tostring(L, 1));
-    for (auto entry : filesystem::directory_iterator(path)) {
-        lua_pushinteger(L, ++size);
-        lua_pushstring(L, entry.path().string().c_str());
-        lua_rawset(L, -3);
+    if (lua_gettop(L) < 2) {
+        for (auto entry : filesystem::directory_iterator(path)) {
+            lua_pushinteger(L, ++size);
+            lua_pushstring(L, entry.path().string().c_str());
+            lua_rawset(L, -3);
+        }
+    }
+    else {
+        for (auto entry : filesystem::recursive_directory_iterator(path)) {
+            lua_pushinteger(L, ++size);
+            lua_pushstring(L, entry.path().string().c_str());
+            lua_rawset(L, -3);
+        }
     }
     return 1;
 }
