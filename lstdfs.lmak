@@ -1,0 +1,36 @@
+--工程名字
+PROJECT_NAME = "lstdfs"
+
+--目标名字
+TARGET_NAME = "lstdfs"
+
+----工程类型: static/dynamic/exe
+PROJECT_TYPE = "dynamic"
+
+--C++标准库版本
+--c++11/c++14/c++17/c++20
+STDCPP = "c++17"
+
+--需要的include目录
+INCLUDES = {
+	"../lua/lua"
+}
+
+--需要连接的库文件
+LIBS = {
+	"lua"
+}
+
+--LINUX需要连接的库文件
+--gcc9.1前filesystem需要链接stdc++fs
+LINUX_LIBS = {
+	"stdc++fs"
+}
+
+--依赖项目
+DEPS = {
+	"lualib"
+}
+
+--分组定义
+GROUP = "luaext"
