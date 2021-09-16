@@ -9,7 +9,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src/lstdfs.cpp" />
+    <ClCompile Include="src\lstdfs.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8667E717-B97C-935C-4FDF-2878AF7DAB1A}</ProjectGuid>

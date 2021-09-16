@@ -3,7 +3,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src/lstdfs.cpp">
+    <ClCompile Include="src\lstdfs.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

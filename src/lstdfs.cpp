@@ -19,8 +19,9 @@ using namespace std::chrono;
 #endif
 
 static int lstdfs_absolute(lua_State* L) {
-    auto path = filesystem::absolute(lua_tostring(L, 1));
-    lua_pushstring(L, path.string().c_str());
+    filesystem::path path = filesystem::path(lua_tostring(L, 1));
+    auto absolute = filesystem::absolute(path);
+    lua_pushstring(L, absolute.string().c_str());
     return 1;
 }
 
@@ -38,7 +39,8 @@ static int lstdfs_temp_dir(lua_State* L) {
 
 static int lstdfs_chdir(lua_State* L) {
     try {
-        filesystem::current_path(lua_tostring(L, 1));
+        filesystem::path path = filesystem::path(lua_tostring(L, 1));
+        filesystem::current_path(path);
         lua_pushboolean(L, true);
         return 1;
     }
@@ -51,7 +53,8 @@ static int lstdfs_chdir(lua_State* L) {
 
 static int lstdfs_mkdir(lua_State* L) {
     try {
-        bool res = filesystem::create_directories(lua_tostring(L, 1));
+        filesystem::path path = filesystem::path(lua_tostring(L, 1));
+        bool res = filesystem::create_directories(path);
         lua_pushboolean(L, res);
         return 1;
     }
@@ -144,7 +147,9 @@ static int lstdfs_copy_option(lua_State* L) {
 
 static int lstdfs_rename(lua_State* L) {
     try {
-        filesystem::rename(lua_tostring(L, 1), lua_tostring(L, 2));
+        filesystem::path pold = filesystem::path(lua_tostring(L, 1));
+        filesystem::path pnew = filesystem::path(lua_tostring(L, 2));
+        filesystem::rename(pold, pnew);
         lua_pushboolean(L, true);
         return 1;
     }
@@ -156,7 +161,8 @@ static int lstdfs_rename(lua_State* L) {
 }
 
 static int lstdfs_exists(lua_State* L) {
-    lua_pushboolean(L, filesystem::exists(lua_tostring(L, 1)));
+    filesystem::path path = filesystem::path(lua_tostring(L, 1));
+    lua_pushboolean(L, filesystem::exists(path));
     return 1;
 }
 
@@ -198,8 +204,15 @@ static int lstdfs_relative_path(lua_State* L) {
 
 static int lstdfs_append(lua_State* L) {
     filesystem::path path = filesystem::path(lua_tostring(L, 1));
-    path.append(lua_tostring(L, 2));
-    lua_pushstring(L, path.string().c_str());
+    const char* append_path = lua_tostring(L, 2);
+    lua_pushstring(L, path.append(append_path).string().c_str());
+    return 1;
+}
+
+static int lstdfs_concat(lua_State* L) {
+    filesystem::path path = filesystem::path(lua_tostring(L, 1));
+    const char* concat_path = lua_tostring(L, 2);
+    lua_pushstring(L, path.concat(concat_path).string().c_str());
     return 1;
 }
 
@@ -230,7 +243,8 @@ static int lstdfs_stem(lua_State* L) {
 }
 
 static int lstdfs_is_directory(lua_State* L) {
-    lua_pushboolean(L, filesystem::is_directory(lua_tostring(L, 1)));
+    filesystem::path path = filesystem::path(lua_tostring(L, 1));
+    lua_pushboolean(L, filesystem::is_directory(path));
     return 1;
 }
 
@@ -241,11 +255,19 @@ static int lstdfs_is_absolute(lua_State* L) {
 }
 
 static int lstdfs_last_write_time(lua_State* L) {
-    auto ftime = filesystem::last_write_time(lua_tostring(L, 1));
-    auto sctp = time_point_cast<system_clock::duration>(ftime - filesystem::file_time_type::clock::now() + system_clock::now());
-    std::time_t cftime = system_clock::to_time_t(sctp);
-    lua_pushinteger(L, cftime);
-    return 1;
+    try {
+        filesystem::path path = filesystem::path(lua_tostring(L, 1));
+        auto ftime = filesystem::last_write_time(path);
+        auto sctp = time_point_cast<system_clock::duration>(ftime - filesystem::file_time_type::clock::now() + system_clock::now());
+        std::time_t cftime = system_clock::to_time_t(sctp);
+        lua_pushinteger(L, cftime);
+        return 1;
+    }
+    catch (filesystem::filesystem_error e) {
+        lua_pushnil(L);
+        lua_pushstring(L, e.what());
+        return 2;
+    }
 }
 
 static void push_file_type(lua_State* L, filesystem::path path){
@@ -266,7 +288,8 @@ static void push_file_type(lua_State* L, filesystem::path path){
 }
 
 static int lstdfs_filetype(lua_State* L) {
-    push_file_type(L, lua_tostring(L, 1));
+    filesystem::path path = filesystem::path(lua_tostring(L, 1));
+    push_file_type(L, path);
     return 1;
 }
 
@@ -324,6 +347,8 @@ static const luaL_Reg lstdfs_funs[] = {
     { "rename", lstdfs_rename },
     { "exists", lstdfs_exists },
     { "remove", lstdfs_remove },
+    { "append", lstdfs_append },
+    { "concat", lstdfs_concat },
     { "temp_dir", lstdfs_temp_dir },
     { "absolute", lstdfs_absolute },
     { "filetype", lstdfs_filetype },
