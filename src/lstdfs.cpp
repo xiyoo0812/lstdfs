@@ -44,7 +44,7 @@ static int lstdfs_chdir(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -58,7 +58,7 @@ static int lstdfs_mkdir(lua_State* L) {
         lua_pushboolean(L, res);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -81,7 +81,7 @@ static int lstdfs_remove(lua_State* L) {
         lua_pushboolean(L, res);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -97,7 +97,7 @@ static int lstdfs_copy(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -113,7 +113,7 @@ static int lstdfs_copy_file(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -153,7 +153,7 @@ static int lstdfs_rename(lua_State* L) {
         lua_pushboolean(L, true);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushboolean(L, false);
         lua_pushstring(L, e.what());
         return 2;
@@ -263,7 +263,7 @@ static int lstdfs_last_write_time(lua_State* L) {
         lua_pushinteger(L, cftime);
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_pushnil(L);
         lua_pushstring(L, e.what());
         return 2;
@@ -324,7 +324,7 @@ static int lstdfs_dir(lua_State* L) {
         }
         return 1;
     }
-    catch (filesystem::filesystem_error e) {
+    catch (filesystem::filesystem_error const& e) {
         lua_settop(L, top);
         lua_pushnil(L);
         lua_pushstring(L, e.what());
