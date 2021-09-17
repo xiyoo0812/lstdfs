@@ -299,10 +299,23 @@ static int lstdfs_dir(lua_State* L) {
         recursive = lua_toboolean(L, 2);
     }
     size_t size = 0;
+    int top = lua_gettop(L);
     filesystem::path path = filesystem::path(lua_tostring(L, 1));
-    lua_newtable(L);
-    if (recursive) {
-        for (auto entry : filesystem::recursive_directory_iterator(path)) {
+    try {
+        lua_newtable(L);
+        if (recursive) {
+            for (auto entry : filesystem::recursive_directory_iterator(path)) {
+                lua_pushinteger(L, ++size);
+                lua_newtable(L);
+                lua_pushstring(L, entry.path().string().c_str());
+                lua_setfield(L, -2, "name");
+                push_file_type(L, entry.path());
+                lua_setfield(L, -2, "type");
+                lua_rawset(L, -3);
+            }
+            return 1;
+        }
+        for (auto entry : filesystem::directory_iterator(path)) {
             lua_pushinteger(L, ++size);
             lua_newtable(L);
             lua_pushstring(L, entry.path().string().c_str());
@@ -313,16 +326,12 @@ static int lstdfs_dir(lua_State* L) {
         }
         return 1;
     }
-    for (auto entry : filesystem::directory_iterator(path)) {
-        lua_pushinteger(L, ++size);
-        lua_newtable(L);
-        lua_pushstring(L, entry.path().string().c_str());
-        lua_setfield(L, -2, "name");
-        push_file_type(L, entry.path());
-        lua_setfield(L, -2, "type");
-        lua_rawset(L, -3);
+    catch (filesystem::filesystem_error e) {
+        lua_settop(L, top);
+        lua_pushnil(L);
+        lua_pushstring(L, e.what());
+        return 2;
     }
-    return 1;
 }
 
 static int lstdfs_split(lua_State* L) {
