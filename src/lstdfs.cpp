@@ -21,7 +21,7 @@ namespace lstdfs {
     using file_vector = std::vector<file_info>;
     using path_vector = std::vector<std::string>;
 
-    std::string lstdfs_absolute(std::string& path) {
+    std::string lstdfs_absolute(std::string path) {
         return filesystem::absolute(path).string();
     }
 
@@ -33,7 +33,7 @@ namespace lstdfs {
         return filesystem::temp_directory_path().string();
     }
 
-    sol::variadic_results lstdfs_chdir(std::string& path, sol::this_state L) {
+    sol::variadic_results lstdfs_chdir(std::string path, sol::this_state L) {
         sol::variadic_results values;
         try {
             filesystem::current_path(path);
@@ -47,7 +47,7 @@ namespace lstdfs {
         }
     }
 
-    sol::variadic_results lstdfs_mkdir(std::string& path, sol::this_state L) {
+    sol::variadic_results lstdfs_mkdir(std::string path, sol::this_state L) {
         sol::variadic_results values;
         try {
             bool res = filesystem::create_directories(path);
@@ -61,7 +61,7 @@ namespace lstdfs {
         }
     }
 
-    sol::variadic_results lstdfs_remove(std::string& path, bool rmall, sol::this_state L) {
+    sol::variadic_results lstdfs_remove(std::string path, bool rmall, sol::this_state L) {
         sol::variadic_results values;
         try {
             if (rmall) {
@@ -80,7 +80,7 @@ namespace lstdfs {
         }
     }
 
-    sol::variadic_results lstdfs_copy(std::string& from, std::string& to, filesystem::copy_options option, sol::this_state L) {
+    sol::variadic_results lstdfs_copy(std::string from, std::string to, filesystem::copy_options option, sol::this_state L) {
         sol::variadic_results values;
         try {
             filesystem::copy(from, to, option);
@@ -93,7 +93,7 @@ namespace lstdfs {
             return values;
         }
     }
-    sol::variadic_results lstdfs_copy_file(std::string& from, std::string& to, filesystem::copy_options option, sol::this_state L) {
+    sol::variadic_results lstdfs_copy_file(std::string from, std::string to, filesystem::copy_options option, sol::this_state L) {
         sol::variadic_results values;
         try {
             filesystem::copy_file(from, to, option);
@@ -107,7 +107,7 @@ namespace lstdfs {
         }
     }    
 
-    sol::variadic_results lstdfs_rename(std::string& pold, std::string& pnew, sol::this_state L) {
+    sol::variadic_results lstdfs_rename(std::string pold, std::string pnew, sol::this_state L) {
         sol::variadic_results values;
         try {
             filesystem::rename(pold, pnew);
@@ -121,67 +121,67 @@ namespace lstdfs {
         }
     }
 
-    bool lstdfs_exists(std::string& path) {
+    bool lstdfs_exists(std::string path) {
         return filesystem::exists(path);
     }
 
-    std::string lstdfs_root_name(std::string& path) {
+    std::string lstdfs_root_name(std::string path) {
         return filesystem::path(path).root_name().string();
     }
 
-    std::string lstdfs_filename(std::string& path) {
+    std::string lstdfs_filename(std::string path) {
         return filesystem::path(path).filename().string();
     }
 
-    std::string lstdfs_extension(std::string& path) {
+    std::string lstdfs_extension(std::string path) {
         return filesystem::path(path).extension().string();
     }
 
-    std::string lstdfs_root_path(std::string& path) {
+    std::string lstdfs_root_path(std::string path) {
         return filesystem::path(path).root_path().string();
     }
 
-    std::string lstdfs_parent_path(std::string& path) {
+    std::string lstdfs_parent_path(std::string path) {
         return filesystem::path(path).parent_path().string();
     }
 
-    std::string lstdfs_relative_path(std::string& path) {
+    std::string lstdfs_relative_path(std::string path) {
         return filesystem::path(path).relative_path().string();
     }
 
-    std::string lstdfs_append(std::string& path, std::string& append_path) {
+    std::string lstdfs_append(std::string path, std::string append_path) {
         return filesystem::path(path).append(append_path).string();
     }
 
-    std::string lstdfs_concat(std::string& path, std::string& concat_path) {
+    std::string lstdfs_concat(std::string path, std::string concat_path) {
         return filesystem::path(path).concat(concat_path).string();
     }
 
-    std::string lstdfs_remove_filename(std::string& path) {
+    std::string lstdfs_remove_filename(std::string path) {
         return filesystem::path(path).remove_filename().string();
     }
 
-    std::string lstdfs_replace_filename(std::string& path, std::string& filename) {
+    std::string lstdfs_replace_filename(std::string path, std::string filename) {
         return filesystem::path(path).replace_filename(filename).string();
     }
 
-    std::string lstdfs_replace_extension(std::string& path, std::string& extens) {
+    std::string lstdfs_replace_extension(std::string path, std::string extens) {
         return filesystem::path(path).replace_extension(extens).string();
     }
 
-    std::string lstdfs_stem(std::string& path) {
+    std::string lstdfs_stem(std::string path) {
         return filesystem::path(path).stem().string();
     }
 
-    bool lstdfs_is_directory(std::string& path) {
+    bool lstdfs_is_directory(std::string path) {
         return filesystem::is_directory(path);
     }
 
-    bool lstdfs_is_absolute(std::string& path) {
+    bool lstdfs_is_absolute(std::string path) {
         return filesystem::path(path).is_absolute();
     }
 
-    sol::variadic_results lstdfs_last_write_time(std::string& path, sol::this_state L) {
+    sol::variadic_results lstdfs_last_write_time(std::string path, sol::this_state L) {
         sol::variadic_results values;
         try {
             auto ftime = filesystem::last_write_time(path);
@@ -214,11 +214,11 @@ namespace lstdfs {
         }
     }
 
-    std::string lstdfs_filetype(std::string& path) {
+    std::string lstdfs_filetype(std::string path) {
         return get_file_type(filesystem::path(path));
     }
 
-    sol::variadic_results lstdfs_dir(std::string& path, bool recursive, sol::this_state L) {
+    sol::variadic_results lstdfs_dir(std::string path, bool recursive, sol::this_state L) {
         sol::variadic_results values;
         try {
             file_vector files;
@@ -242,7 +242,7 @@ namespace lstdfs {
         }
     }
 
-    path_vector lstdfs_split(std::string& cpath) {
+    path_vector lstdfs_split(std::string cpath) {
         path_vector values;
         filesystem::path path = filesystem::path(cpath);
         for (auto it = path.begin(); it != path.end(); ++it) {
