@@ -26,6 +26,7 @@ STDCPP = -std=c++17
 
 #需要的include目录
 MYCFLAGS += -I../lua/lua
+MYCFLAGS += -I../sol2/include
 
 #需要定义的选项
 
