@@ -304,6 +304,8 @@ namespace lstdfs {
     }
 }
 
-extern "C" LUALIB_API int luaopen_lstdfs(lua_State* L) {
-    return sol::stack::call_lua(L, 1, lstdfs::open_lstdfs);
+extern "C" {
+    LUALIB_API int luaopen_lstdfs(lua_State* L) {
+        return sol::stack::call_lua(L, 1, lstdfs::open_lstdfs);
+    }
 }
