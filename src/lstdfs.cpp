@@ -1,3 +1,5 @@
+#define LUA_LIB
+
 #include <chrono>
 #include <iostream>
 #include <filesystem>
@@ -302,12 +304,6 @@ namespace lstdfs {
     }
 }
 
-#ifdef _MSC_VER
-#define LSTDFS_API extern "C" _declspec(dllexport)
-#else
-#define LSTDFS_API extern "C"
-#endif
-
-LSTDFS_API int luaopen_lstdfs(lua_State* L) {
+extern "C" LUALIB_API int luaopen_lstdfs(lua_State* L) {
     return sol::stack::call_lua(L, 1, lstdfs::open_lstdfs);
 }
