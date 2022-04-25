@@ -3,13 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <filesystem>
-
-#include "sol/sol.hpp"
-
-extern "C" {
-    #include "lua.h"
-    #include "lauxlib.h"
-}
+#include "lua_kit.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -20,7 +14,7 @@ namespace lstdfs {
         std::string name;
         std::string type;
     };
-    using file_vector = std::vector<file_info>;
+    using file_vector = std::vector<file_info*>;
     using path_vector = std::vector<std::string>;
 
     std::string lstdfs_absolute(std::string path) {
@@ -35,91 +29,72 @@ namespace lstdfs {
         return filesystem::temp_directory_path().string();
     }
 
-    sol::variadic_results lstdfs_chdir(std::string path, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_chdir(lua_State* L, std::string path) {
+        luakit::kit_state kit_state(L);
         try {
             filesystem::current_path(path);
-            values.push_back({ L, sol::in_place_type<bool>, true });
-            return values;
+            return kit_state.as_return(true);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
-    sol::variadic_results lstdfs_mkdir(std::string path, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_mkdir(lua_State* L, std::string path) {
+        luakit::kit_state kit_state(L);
         try {
             bool res = filesystem::create_directories(path);
-            values.push_back({ L, sol::in_place_type<bool>, res });
-            return values;
+            return kit_state.as_return(res);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
-    sol::variadic_results lstdfs_remove(std::string path, bool rmall, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_remove(lua_State* L, std::string path, bool rmall) {
+        luakit::kit_state kit_state(L);
         try {
             if (rmall) {
                 auto size = filesystem::remove_all(path);
-                values.push_back({ L, sol::in_place_type<bool>, size > 0 });
-                return values;
+                return kit_state.as_return(size > 0);
             }
             bool res = filesystem::remove(path);
-            values.push_back({ L, sol::in_place_type<bool>, res });
-            return values;
+            return kit_state.as_return(res);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
-    sol::variadic_results lstdfs_copy(std::string from, std::string to, filesystem::copy_options option, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_copy(lua_State* L, std::string from, std::string to, filesystem::copy_options option) {
+        luakit::kit_state kit_state(L);
         try {
             filesystem::copy(from, to, option);
-            values.push_back({ L, sol::in_place_type<bool>, true });
-            return values;
+            return kit_state.as_return(true);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
-    sol::variadic_results lstdfs_copy_file(std::string from, std::string to, filesystem::copy_options option, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_copy_file(lua_State* L, std::string from, std::string to, filesystem::copy_options option) {
+        luakit::kit_state kit_state(L);
         try {
             filesystem::copy_file(from, to, option);
-            values.push_back({ L, sol::in_place_type<bool>, true });
-            return values;
+            return kit_state.as_return(true);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }    
 
-    sol::variadic_results lstdfs_rename(std::string pold, std::string pnew, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_rename(lua_State* L, std::string pold, std::string pnew) {
+        luakit::kit_state kit_state(L);
         try {
             filesystem::rename(pold, pnew);
-            values.push_back({ L, sol::in_place_type<bool>, true });
-            return values;
+            return kit_state.as_return(true);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
@@ -183,19 +158,16 @@ namespace lstdfs {
         return filesystem::path(path).is_absolute();
     }
 
-    sol::variadic_results lstdfs_last_write_time(std::string path, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_last_write_time(lua_State* L, std::string path) {
+        luakit::kit_state kit_state(L);
         try {
             auto ftime = filesystem::last_write_time(path);
             auto sctp = time_point_cast<system_clock::duration>(ftime - filesystem::file_time_type::clock::now() + system_clock::now());
             std::time_t cftime = system_clock::to_time_t(sctp);
-            values.push_back({ L, sol::in_place_type<uint64_t>, cftime });
-            return values;
+            return kit_state.as_return(cftime);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
@@ -220,27 +192,23 @@ namespace lstdfs {
         return get_file_type(filesystem::path(path));
     }
 
-    sol::variadic_results lstdfs_dir(std::string path, bool recursive, sol::this_state L) {
-        sol::variadic_results values;
+    luakit::variadic_results lstdfs_dir(lua_State* L, std::string path, bool recursive) {
+        luakit::kit_state kit_state(L);
         try {
             file_vector files;
             if (recursive) {
                 for (auto entry : filesystem::recursive_directory_iterator(path)) {
-                    files.push_back(file_info({ entry.path().string(), get_file_type(entry.path()) }));
+                    files.push_back(new file_info({ entry.path().string(), get_file_type(entry.path()) }));
                 }
-                values.push_back({ L, sol::in_place_type<file_vector>, files });
-                return values;
+                return kit_state.as_return(files);
             }
             for (auto entry : filesystem::directory_iterator(path)) {
-                files.push_back(file_info({ entry.path().string(), get_file_type(entry.path()) }));
+                files.push_back(new file_info({ entry.path().string(), get_file_type(entry.path()) }));
             }
-            values.push_back({ L, sol::in_place_type<file_vector>, files });
-            return values;
+            return kit_state.as_return(files);
         }
         catch (filesystem::filesystem_error const& e) {
-            values.push_back({ L, sol::in_place_type<bool>, false });
-            values.push_back({ L, sol::in_place_type<std::string>, e.what() });
-            return values;
+            return kit_state.as_return(false, e.what());
         }
     }
 
@@ -253,13 +221,10 @@ namespace lstdfs {
         return values;
     }
 
-    sol::table open_lstdfs(sol::this_state L) {
-        sol::state_view lua(L);
-        auto lstdfs = lua.create_table();
-        lstdfs.new_usertype<file_info>("file_info",
-            "name", &file_info::name,
-            "type", &file_info::type
-        );
+    luakit::lua_table open_lstdfs(lua_State* L) {
+        luakit::kit_state kit_state(L);
+        kit_state.new_class<file_info>("name", &file_info::name, "type", &file_info::type);
+        auto lstdfs = kit_state.new_table();
         lstdfs.new_enum("copy_options",
             "none", filesystem::copy_options::none,
             "recursive", filesystem::copy_options::recursive,
@@ -306,6 +271,7 @@ namespace lstdfs {
 
 extern "C" {
     LUALIB_API int luaopen_lstdfs(lua_State* L) {
-        return sol::stack::call_lua(L, 1, lstdfs::open_lstdfs);
+        auto lstdfs = lstdfs::open_lstdfs(L);
+        return lstdfs.push_stack();
     }
 }

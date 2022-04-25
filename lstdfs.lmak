@@ -10,7 +10,7 @@ PROJECT_TYPE = "dynamic"
 --需要的include目录
 INCLUDES = {
 	"../lua/lua",
-	"../sol2/include"
+	"../luakit/include"
 }
 
 --需要连接的库文件
